@@ -11,20 +11,20 @@ Instead of relying on Arduino wrappers, this guide focuses on bare-metal concept
 
 The projects in this repository are structured sequentially. It is highly recommended to follow them in order:
 
-### 🎒 Module 1: Core Peripherals & Bare-Metal Basics
+### 🎒 -Core Peripherals & Bare-Metal Basics
 *   **Blink_LED** – The "Hello World" of hardware. Learn GPIO configuration, output states, and basic hardware delays.
 *   **Button_Input** – Reading digital inputs, polling methods, and handling mechanical button debouncing.
 *   **Hardware_Interrupts** – Moving away from polling. Configuring ISR (Interrupt Service Routine) handlers to catch button presses instantly.
 
-### ⏱️ Module 2: Communication Protocols
+### ⏱️ -Communication Protocols
 *   **UART_Console** – Setting up Universal Asynchronous Receiver-Transmitter for serial debugging, transmitting text, and reading user input.
 *   **I2C_Sensors** – Mastering the Inter-Integrated Circuit bus. Scanning for addresses and reading data from basic sensors (e.g., MPU6050, BMP280).
 
-### 🔄 Module 3: FreeRTOS (Real-Time Operating System)
+### 🔄 -FreeRTOS (Real-Time Operating System)
 *   **RTOS_Tasks** – Creating, prioritizing, and managing independent execution threads.
 *   **Task_Notification_Queues** – Passing data and synchronization triggers safely between distinct hardware tasks.
 
-### 🌐 Module 4: Wi-Fi & Advanced Networking
+### 🌐 -Wi-Fi & Advanced Networking
 *   **WiFi_Station_STA** – Connecting your ESP32 to a local home Wi-Fi network and obtaining an IP address via DHCP.
 *   **WiFi_Access_Point_AP** – Hosting your own local wireless network network so other devices (like phones) can connect directly to the ESP32.
 *   **10_WiFi_Promiscuous_Sniffer** – Going deep into packet analysis. Dropping network abstractions to capture raw 802.11 Wi-Fi frames directly out of the air.
@@ -45,14 +45,14 @@ To run the examples in this repository, you will need:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com
-cd Getting-Started-with-ESP-IDF
+git clone https://github.com/Ra-Ma-Dan/Getting-Started-with-ESP-IDF.git
+cd Starting with ESP-IDF
 ```
 
 ### 2. Set the Target Chip
-Change directories into the specific module you want to try, then set your microcontroller target (e.g., standard esp32, esp32c3, esp32s3):
+Change directories into the specific module you want to try(Blink_LED, Btn_controlled_LED e.t.c), then set your microcontroller target (e.g., standard esp32, esp32c3, esp32s3):
 ```bash
-cd Blink_LED
+cd Blink_LED 
 idf.py set-target esp32
 ```
 
