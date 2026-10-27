@@ -60,10 +60,13 @@ void init_wifi_station(){
 
 
     wifi_config_t wifi_cfg = {
-        .ssid = TARGET_WIFI_SSID,
-        .password = TARGET_WIFI_PASS,
-        .chanel = 0,
+        .sta = {
+            .ssid = TARGET_WIFI_SSID,
+            .password = TARGET_WIFI_PASS,
+            .chanel = 0,
+        }
     };
+    
     esp_wifi_set_mode(WIFI_MODE_STA);
     esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
 
