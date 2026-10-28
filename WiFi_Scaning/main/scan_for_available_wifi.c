@@ -39,13 +39,16 @@ void scan_for_network(){
         wifi_ap_record_t records[MAX_NETWORK];
 
         ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(&num_of_networks));
+        
+        if (num_of_networks > MAX_NETWORK){
+            num_of_networks = MAX_NETWORK;
+        }
+        
         ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&num_of_networks, records));
-
-        num_of_networks = (num_of_networks <= MAX_NETWORK) ? num_of_networks : MAX_NETWORK;
 
         ESP_LOGI(TAG, "%d networks found: ", num_of_networks);
         for(int i = 0; i < num_of_networks; i++){
-            ESP_LOGI(TAG, "Name: %s, MAC: %d, at channel: %d", records[1].ssid, records[1].rssi, records[1].primary);
+            ESP_LOGI(TAG, "Name: %s, MAC: %d, at channel: %d", records[i].ssid, records[i].rssi, records[i].primary);
         }
 
         vTaskDelay(pdMS_TO_TICKS(10000));
@@ -62,6 +65,6 @@ void main(){
 
     init_wifi_station();
 
-    xTaskCreate(scan_networks, "Scan_for_APs", 2048, NULL, 8, NULL);
+    xTaskCreate(scan_networks, "Scan_for_APs", 4096, NULL, 8, NULL);
 
 }

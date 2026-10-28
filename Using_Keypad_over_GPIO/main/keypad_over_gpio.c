@@ -1,70 +1,121 @@
+//  Normal 4x4 matrix keypad over GPIO has 8 pins, 
+// 4 col pins and 4 row pins.
+// The way the device works is that, a loop is used to pull a row at a time,
+// when a row is low, we loop throgh all the 4 colls and check which col is low at that time, which translate too, 
+//                 1   2   3   A
+//                 4   5   6   B
+//                 7   8   9   C
+//                 *   0   #   D
+
+// key low at *col* at *row*
+
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
-#include "driver/gpio.h"
-#include "esp_err.h"
 #include "esp_log.h"
-#include "i2c_master.h"
+#include "esp_err.h"
+#include "driver/gpio.h"
+#include "esp_rom_sys.h"
 
-#define SDA_PIN             GPIO_NUM_17
-#define SCL_PIN             GPIO_NUM_18
-#define I2C_CLK_SPEED       400000 //i2c high clock speed 
-#define I2C_PORT_NUM        0
+//Collumn pins: Map with the ones connected to the real Keypad
+#define COL_1_PIN GPIO_NUM_1
+#define COL_2_PIN GPIO_NUM_2
+#define COL_3_PIN GPIO_NUM_3
+#define COL_4_PIN GPIO_NUM_4
 
-#define DEVICE_ADDRE        0x89 //address of the target device
+//Row pins: Map with the ones connected to the real Keypad
+#define ROW_1_PIN GPIO_NUM_1
+#define ROW_2_PIN GPIO_NUM_2
+#define ROW_3_PIN GPIO_NUM_3
+#define ROW_4_PIN GPIO_NUM_4
 
-static const char* TAG = "I2C";
+#define ROWS    4
+#define COLS    4
 
-void i2c_initialize(){
-    i2c_config_t master_cfg = {
-        .clk_source                   = I2C_CLK_SOURCE_DEFAULT,
-        .sda_io_num                   = SDA_PIN,
-        .scl_io_num                   = SCL_PIN,
-        .i2c_port                     = TEST_I2C_PORT,
-        .glith_ignore_cnt             = 7,
-        .flags.enable_internal_pullup = true
+static const char *TAG = "KEYPAD";
+
+
+gpio_num_t row_pins[ROWS] = {ROW_1_PIN, ROW_2_PIN, ROW_3_PIN, ROW_4_PIN};
+gpio_num_t col_pins[COLS] = {COL_1_PIN, COL_2_PIN, COL_3_PIN, COL_4_PIN};
+
+const char keypad_matrix[ROWS][COLS] = {
+    {'1', '2', '3', 'A'},
+    {'4', '5', '6', 'B'},
+    {'7', '8', '9', 'C'},
+    {'*', '0', '#', 'D'}
+};
+
+
+void keypad_pin_init(){
+
+    gpio_config_t row_pins_cfg = {
+        .pin_bit_mask = (1ULL << ROW_1_PIN) |
+                        (1ULL << ROW_2_PIN) |
+                        (1ULL << ROW_3_PIN) |
+                        (1ULL << ROW_4_PIN),
+        .mode         = GPIO_MODE_OUTPUT,
+        .pull_up_en   = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type    = GPIO_INTR_DISABLE
     };
-    i2c_master_bus_handle_t master_bus;
-    ESP_ERROR_CHECK(i2c_new_master_bus(&master_bus, &master_cfg));
+    ESP_ERROR_CHECK(gpio_config(&row_pins_cfg));
 
-    i2c_master_dev_config_t dev_cfg = {
-        .dev_addr_length = I2C_DEV_ADDR_BIT_LEN_7,
-        .clk_speed_hz    = I2C_CLK_SPEED,
-        .device_address  = DEVICE_ADDRE
+    for (int i = 0; i < ROWS; i++){
+        gpio_set_level(row_pins[i], 1);
+    }
+
+    gpio_config_t col_pins_cfg = {
+        .pin_bit_mask = (1ULL << COL_1_PIN) |
+                        (1ULL << COL_2_PIN) |
+                        (1ULL << COL_3_PIN) |
+                        (1ULL << COL_4_PIN),
+        .mode         = GPIO_MODE_INPUT,
+        .pull_up_en   = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type    = GPIO_INTR_DISABLE
     };
-    i2c_master_dev_handle_t dev_handle;
-    ESP_ERROR_CHECK(i2c_master_bus_add_device(master_bus, &dev_handle, &dev_cfg));
-    ESP_LOGI(TAG, "i2c initialized");
+    ESP_ERROR_CHECK(gpio_config(&col_pins_cfg));
+
+    ESP_LOGI(TAG, "Keypad Initialized");
+
 }
 
-void transmit_data(uint16_t data, size_t data_size, int timeout){
-    esp_err_t res = i2c_master_transmit(dev_handle, data, data_size, timeout);
-    if(res != ESP_OK) {
-        ESP_LOGI(TAG, "Unable to transmit data: %s", esp_err_to_name(res));
+char read_key(){
+    for(int i = 0; i < ROWS; i++){
+        gpio_set_level(row_pins[i], 0);
+        esp_rom_delay_us(10);
+        
+        for(int j = 0; j < COLS; j++){
+            if(gpio_get_level(col_pins[j]) == 0){
+
+                while (gpio_get_level(col_pins[j]) == 0) esp_rom_delay_us(10);
+                
+                gpio_set_level(row_pins[i], 1);
+                
+                return keypad_matrix[i][j];
+            }
+        }   
+        gpio_set_level(row_pins[i], 1);
     }
+    return '\0';
 }
 
-void recieve_data(uint16_t data, size_t data_size, int timeout){
-    esp_err_t res = i2c_master_recieve(dev_handle, data, data_size, timeout);
-    if(res != ESP_OK) {
-        ESP_LOGI(TAG, "Unable to read data: %s", esp_err_to_name(res));
-    }
-}
+void keypad_task(){
 
-
-void transmit_recieve(uint16_t data, size_t data_size, uint16_t buffer, size_t buf_size, int timeout){
-    esp_err_t res = i2c_master_transmit(dev_handle, data, data_size, buffer, buf_size, timeout);
-
-    if(res != ESP_OK) {
-        ESP_LOGI(TAG, "Unable to trancieve data: %s", esp_err_to_name(res));
-    }
-}
-
-
-void main(){
-    i2c_initialize();
+    char key;
 
     while(true){
-        
-        vTaskDelay(pdMS_TO_TICKS(100));
+        key = read_key();
+        if (key){
+            printf("%c\n", key);
+        }
+        vTaskDelay(20);
     }
+}
+
+void main(){
+
+    keypad_pin_init();
+    ESP_LOGI(TAG, "Started");
+
+    xTaskCreate(keypad_task, "Reading_keypad", 2048, NULL, 8, NULL);
 }
