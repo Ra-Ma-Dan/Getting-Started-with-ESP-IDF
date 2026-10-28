@@ -2,10 +2,12 @@
 #include "freertos/FreeRTOS.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
-#include "freertos/event_group.h"
+#include "freertos/event_groups.h"
 #include "nvs_flash.h"
 #include "esp_log.h"
 #include "esp_err.h"
+#include "esp_mac.h"
+#include "esp_netif.h"
 
 
 #define WIFI_CONNECTED_BIT  BIT0
@@ -21,7 +23,7 @@ int num_retry = 0;
 EventGroupHandle_t wifi_event_group_handle;
 
 
-void IRAM_ATTR wifi_events_handler_fxn(void *args, esp_event_base_t event_base, uint16_t event_id void *event_info){
+void IRAM_ATTR wifi_events_handler_fxn(void *args, esp_event_base_t event_base, int16_t event_id void *event_info){
     if(event_base == WIFI_EVENT){
         if(event_id == WIFI_EVENT_STA_START){
             esp_wifi_connect();
@@ -47,9 +49,10 @@ void init_wifi_station(){
 
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_group_create_default());
-    ESP_ERROR_CHECK(esp_netif_create_default_wifi_sta());
+    esp_netif_t sta_netif = esp_netif_create_default_wifi_sta();
+    assert(sta_netif);
 
-    wifi_init_config_t wifi_init = wifi_init_config_default();
+    wifi_init_config_t wifi_init = WIFI_INIT_CONFIG_DEFAULT();
     esp_wifi_init(&wifi_init);
 
     esp_wifi_event_handler_instance_t ip_got_ip;
@@ -63,14 +66,19 @@ void init_wifi_station(){
         .sta = {
             .ssid = TARGET_WIFI_SSID,
             .password = TARGET_WIFI_PASS,
-            .chanel = 0,
+            .channel = 0,
         }
     };
     
     esp_wifi_set_mode(WIFI_MODE_STA);
     esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
 
-    EventBits_t bits = xEventGroupWaitBits(wifi_event_group_handle, WIFI_CONNECTED_BIT | WIFI_FAILED_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
+    EventBits_t bits = xEventGroupWaitBits(wifi_event_group_handle, 
+                                            WIFI_CONNECTED_BIT | WIFI_FAILED_BIT, 
+                                            pdFALSE, 
+                                            pdFALSE, 
+                                            portMAX_DELAY);
+
     if (bits & WIFI_CONNECTED_BIT){
         ESP_LOGI(TAG, "Connected to %s", TARGET_WIFI_SSID);
     } else if (bits WIFI_FAILED_BIT){
@@ -86,7 +94,7 @@ void init_wifi_station(){
 
 void main(){
     esp_err_t res = nvs_flash_init();
-    if (res == ESP_ERR_NVS_NO_PAGES || res == ESP_ERR_NEW_VERSION_FOUND){
+    if (res == ESP_ERR_NVS_NO_FREE_PAGES || res == ESP_ERR_NVS_NEW_VERSION_FOUND){
         nvs_flash_erase();
         res = nvs_flash_init();
     }
