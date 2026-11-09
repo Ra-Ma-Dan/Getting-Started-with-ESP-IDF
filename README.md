@@ -5,6 +5,12 @@ Welcome to the **Getting-Started-with-ESP-IDF**! This repository is designed to 
 
 Instead of relying on Arduino wrappers, this guide focuses on bare-metal concepts, register abstractions, and real-time operating systems using pure C.
 
+***
+
+DISCLAIMER: Good Understanding of C programming is encouraged.
+
+***
+
 ---
 
 ## 🚀 Learning Roadmap & Code Examples
