@@ -4,7 +4,7 @@
 
 
 
-#define LED_PIN_NUM     GPIO_PIN_17
+#define LED_PIN_NUM     GPIO_PIN_16
 
 
 
@@ -28,11 +28,3 @@ void main(){
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
-
-
-01_Blink_LED/
-├── CMakeLists.txt          (Project-level CMake settings)
-├── sdkconfig.defaults      (Optional: Pre-configured settings)
-└── main/
-    ├── CMakeLists.txt      (Component-level CMake settings)
-    └── main.c              (Your primary C code file)

@@ -2,8 +2,8 @@
 #include "freertos/FreeRTOS.h"
 #include "driver/gpio.h"
 
-#define LED_PIN GPIO_NUM_17
-#define BTN_PIN GPIO_NUM_18
+#define LED_PIN GPIO_NUM_16
+#define BTN_PIN GPIO_NUM_20
 
 bool led_state = false;
 

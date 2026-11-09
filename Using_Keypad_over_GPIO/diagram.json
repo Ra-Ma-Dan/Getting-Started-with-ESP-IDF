@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "author": "Abdulrauf Abdulmumeen",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-s3-devkitc-1",
+      "id": "esp",
+      "top": 169.67,
+      "left": -93.92,
+      "rotate": 90,
+      "attrs": { "builder": "esp-idf" }
+    },
+    { "type": "wokwi-membrane-keypad", "id": "keypad1", "top": -155.6, "left": -196, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "keypad1:R1", "esp:14", "green", [ "v0", "h-28.8" ] ],
+    [ "keypad1:R2", "esp:13", "green", [ "v9.6", "h-29.2" ] ],
+    [ "keypad1:R3", "esp:12", "green", [ "v19.2", "h-29.1" ] ],
+    [ "keypad1:C4", "esp:15", "green", [ "v0", "h18.9" ] ],
+    [ "keypad1:C3", "esp:16", "green", [ "v9.6", "h19.05" ] ],
+    [ "keypad1:C2", "esp:17", "green", [ "v19.2", "h9.6" ] ],
+    [ "keypad1:C1", "esp:18", "green", [ "v28.8", "h19.1" ] ],
+    [ "keypad1:R4", "esp:11", "green", [ "v28.8", "h-29" ] ]
+  ],
+  "dependencies": {}
+}

@@ -17,16 +17,16 @@
 #include "esp_rom_sys.h"
 
 //Collumn pins: Map with the ones connected to the real Keypad
-#define COL_1_PIN GPIO_NUM_1
-#define COL_2_PIN GPIO_NUM_2
-#define COL_3_PIN GPIO_NUM_3
-#define COL_4_PIN GPIO_NUM_4
+#define COL_1_PIN GPIO_NUM_18
+#define COL_2_PIN GPIO_NUM_17
+#define COL_3_PIN GPIO_NUM_16
+#define COL_4_PIN GPIO_NUM_15
 
 //Row pins: Map with the ones connected to the real Keypad
-#define ROW_1_PIN GPIO_NUM_1
-#define ROW_2_PIN GPIO_NUM_2
-#define ROW_3_PIN GPIO_NUM_3
-#define ROW_4_PIN GPIO_NUM_4
+#define ROW_1_PIN GPIO_NUM_14
+#define ROW_2_PIN GPIO_NUM_13
+#define ROW_3_PIN GPIO_NUM_12
+#define ROW_4_PIN GPIO_NUM_11
 
 #define ROWS    4
 #define COLS    4
@@ -106,7 +106,8 @@ void keypad_task(){
     while(true){
         key = read_key();
         if (key){
-            printf("%c\n", key);
+            printf("%c\n", key);    //To print letters line by line, remove the newline character '\n'
+                                    // and add 'fflush(stdout)' on this line
         }
         vTaskDelay(20);
     }

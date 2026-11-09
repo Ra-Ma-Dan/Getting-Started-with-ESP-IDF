@@ -1,0 +1,4 @@
+[wokwi]
+version = 1
+firmware = 'Blink_LED/build/esp32dev/firmware.bin'
+elf = 'Blink_LED/build/esp32dev/firmware.elf'
